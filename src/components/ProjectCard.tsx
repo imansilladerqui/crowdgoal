@@ -76,7 +76,7 @@ const ProjectCard = ({
           </div>
           <Progress value={progressPercentage} className="h-2" />
           <div className="flex justify-between text-sm text-foreground/70">
-            <span>{progressPercentage.toFixed(1)}% funded</span>
+            <span>{progressPercentage.toFixed(1)}% funded by fans</span>
             <span>Goal: ${formatAmount(goal)} CHZ</span>
           </div>
         </div>
@@ -84,7 +84,7 @@ const ProjectCard = ({
         <div className="flex justify-between text-sm">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4 text-primary" />
-            <span>{backers} backers</span>
+            <span>{backers} sports fans</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-primary" />

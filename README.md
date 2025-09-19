@@ -1,72 +1,75 @@
 🌐 CrowdGoal
 
-CrowdGoal es una **dApp de crowdfunding Web3** construida sobre la red **Chiliz (EVM compatible)**.  
-Permite a los usuarios crear y financiar proyectos descentralizados, con garantía de reembolsos automáticos si no se cumple el objetivo o la fecha límite.  
-La plataforma retiene un **3% de comisión** sobre campañas exitosas.
+CrowdGoal is the world’s first **Web3 crowdfunding dApp** built on the **Chiliz (EVM compatible) network**—dedicated to empowering sports fans everywhere.
+Unite, fund, and bring to life the most exciting fan-driven sports projects, experiences, and community initiatives.
+The platform retains a **3% commission** on successful campaigns.
 
 ---
 
-## ✨ Características
+## ✨ Features
 
-- 📦 **Crowdfunding descentralizado**: fondos custodiados en contratos inteligentes.
-- 🔒 **Seguridad garantizada**: devolución automática si no se alcanza la meta.
-- 🌍 **Frontend-driven**: arquitectura sin backend tradicional, solo blockchain + IPFS.
-- 🖼️ **Metadatos en IPFS**: descripciones, imágenes y documentos de proyectos se almacenan en sistemas descentralizados.
-- 📊 **UI dinámica**: tarjetas estilo Urbanitae con progreso de recaudación, estado y deadline.
+- 🏟️ **For Fans, By Fans**: Every project is sports-focused, from stadium experiences to fan clubs and athlete support.
+- 📦 **Decentralized crowdfunding**: funds are held in smart contracts.
+- 🔒 **Guaranteed security**: automatic refund if the goal is not reached.
+- 🌍 **Global sports community**: connect with fans worldwide, regardless of sport, team, or country.
+- 🖼️ **Metadata on IPFS**: project descriptions, images, and documents are stored in decentralized systems.
+- 📊 **Dynamic UI**: cards showing fundraising progress, status, and deadline.
+- 💸 **Low fees**: only 3% commission on successful campaigns, so more funds go directly to fan initiatives.
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
 monorepo/
-│── contracts/ # Contratos inteligentes (Hardhat)
+│── contracts/ # Smart contracts (Hardhat)
 │── frontend/ # Frontend (Next.js + Tailwind)
-│── shared/abis/ # ABIs exportadas de Hardhat para el frontend
+│── shared/abis/ # ABIs exported from Hardhat for the frontend
 
-### Flujo de datos
+### Data Flow
 
-1. Los contratos gestionan la lógica crítica:
-   - Objetivo, deadline, recaudación, refunds y distribución.
-2. El contrato guarda un `metadataURI` → apunta a un JSON en **IPFS** con datos visuales (título, descripción, imagen, docs).
-3. El frontend escucha eventos → combina datos **on-chain** (goal, recaudado, estado) con metadata de **IPFS** → renderiza las tarjetas de proyectos.
+1. Smart contracts handle the critical logic:
+   - Goal, deadline, fundraising, refunds, and distribution.
+2. The contract stores a `metadataURI` → points to a JSON on **IPFS** with visual data (title, description, image, docs).
+3. The frontend listens to events → combines **on-chain** data (goal, raised, status) with **IPFS** metadata → renders project cards.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Tech Stack
 
 - **Blockchain & Smart Contracts**
 
-  - [Hardhat](https://hardhat.org/) (compilación, tests, deployment)
-  - Solidity (contratos en Chiliz EVM)
+  - [Hardhat](https://hardhat.org/) (compilation, tests, deployment)
+  - Solidity (contracts on Chiliz EVM)
 
 - **Frontend**
 
-  - [Next.js](https://nextjs.org/) (React SSR/SPA híbrido)
-  - [Tailwind CSS](https://tailwindcss.com/) (UI rápida y responsive)
-  - [Wagmi](https://wagmi.sh/) + [viem](https://viem.sh/) (interacción con contratos)
+  - [Next.js](https://nextjs.org/) (React SSR/SPA hybrid)
+  - [Tailwind CSS](https://tailwindcss.com/) (fast and responsive UI)
+  - [Wagmi](https://wagmi.sh/) + [viem](https://viem.sh/) (contract interaction)
 
-- **Infraestructura**
-  - [IPFS](https://ipfs.io/) (almacenamiento descentralizado de metadata e imágenes)
-  - [The Graph](https://thegraph.com/) (opcional para indexado rápido de eventos)
+- **Infrastructure**
+  - [IPFS](https://ipfs.io/) (decentralized storage for metadata and images)
+  - [The Graph](https://thegraph.com/) (optional for fast event indexing)
   - GitHub Actions (CI/CD)
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-Clonar el repo:
+Clone the repo:
 
-````bash
-git clone https://github.com/tuusuario/crowdgoal.git
+```bash
+git clone https://github.com/imansilladerqui/crowdgoal.git
 cd crowdgoal
+```
 
-Instalar dependencias:
+Install dependencies:
 
 ```bash
 npm install
-````
+```
 
-Iniciar el frontend:
+Start the frontend:
 
 ```bash
 npm run dev
@@ -74,18 +77,18 @@ npm run dev
 
 ---
 
-## 🧑‍💻 Contribuir
+## 🧑‍💻 Contributing
 
-¡Las contribuciones son bienvenidas! Abre un issue o PR en GitHub para sugerir mejoras, reportar bugs o proponer nuevas funcionalidades.
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT.
+Contributions are welcome! Open an issue or PR on GitHub to suggest improvements, report bugs, or propose new features.
 
 ---
 
-## 📬 Contacto
+## 📄 License
 
-Para dudas, soporte o colaboraciones, puedes abrir un issue en GitHub o escribir a [imansilladerqui@hotmail.com](mailto:imansilladerqui@hotmail.com).
+This project is licensed under the MIT License.
+
+---
+
+## 📬 Contact
+
+For questions, support, or collaborations, you can open an issue on GitHub or email [imansilladerqui@hotmail.com](mailto:imansilladerqui@hotmail.com).
