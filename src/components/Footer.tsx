@@ -1,4 +1,4 @@
-import { Github, Twitter, MessageCircle } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -12,68 +12,41 @@ const Footer = () => {
               CrowdGoal
             </div>
             <p className="text-foreground/70 text-sm">
-              Decentralized crowdfunding platform on Chiliz Network. Empowering
-              creators and backers worldwide.
+              CrowdGoal is the world’s first decentralized crowdfunding platform
+              for sports fans. Empowering fan communities to launch, fund, and
+              experience the best in global sports together.
             </p>
             <div className="flex space-x-4">
-              <Twitter className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
-              <Github className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
-              <MessageCircle className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
+              <a
+                href="https://www.linkedin.com/in/imansilladerqui/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Linkedin className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
+              </a>
+              <a
+                href="https://github.com/imansilladerqui"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
+              </a>
+              <a
+                href="mailto:imansilladerqui@hotmail.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Mail className="h-5 w-5 text-foreground/60 hover:text-primary cursor-pointer transition-colors" />
+              </a>
             </div>
           </div>
 
-          {/* Community */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Community</h3>
             <ul className="space-y-2 text-sm text-foreground/70">
               <li>
                 <a href="#" className="hover:text-primary transition-colors">
                   Create Project
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Success Stories
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Guidelines
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Support
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Resources</h3>
-            <ul className="space-y-2 text-sm text-foreground/70">
-              <li>
-                <Link
-                  to="/docs"
-                  className="hover:text-primary transition-colors"
-                >
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Terms of Service
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary transition-colors">
-                  Privacy Policy
                 </a>
               </li>
             </ul>
