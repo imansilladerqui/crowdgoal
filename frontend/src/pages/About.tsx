@@ -10,6 +10,8 @@ import {
   RefreshCw,
   Users,
 } from "lucide-react";
+import { getWalletAddress } from "@/hooks/UseWalletStorage";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 
 const features = [
   {
@@ -50,6 +52,9 @@ const techStack = [
 ];
 
 const About = () => {
+  const { enableWalletDialog } = useWalletDialogs();
+
+  const walletAddress = getWalletAddress();
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -189,6 +194,12 @@ Data Flow:
             <a
               href="/create"
               className="inline-block px-8 py-4 bg-primary text-white rounded-full font-bold shadow hover:bg-primary/80 transition"
+              onClick={(e) => {
+                if (!walletAddress) {
+                  e.preventDefault();
+                  enableWalletDialog.show();
+                }
+              }}
             >
               Start a Project
             </a>

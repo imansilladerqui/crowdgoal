@@ -8,13 +8,20 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-dist-ssr
 
+# Hardhat compilación
+contracts/artifacts
+contracts/cache
+contracts/node_modules
+contracts/.env
+contracts/.next
+
+# FE
 frontend/node_modules
-frontend/dist
-frontend/dist-ssr
-*.local
+
+# Ignore all env files
+contracts/.env*
+frontend/.env*
 
 .vscode/*
 !.vscode/extensions.json
