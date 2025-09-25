@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, TrendingUp, Users } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { getWalletAddress } from "@/hooks/UseWalletStorage";
+
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 
 const Hero = () => {
+  const { enableWalletDialog } = useWalletDialogs();
+  const walletAddress = getWalletAddress();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div
@@ -34,7 +39,7 @@ const Hero = () => {
               size="lg"
               className="text-lg px-8 py-4"
               onClick={() => {
-                const el = document.getElementById("projects-section");
+                const el = document.getElementById("projects");
                 if (el) {
                   el.scrollIntoView({ behavior: "smooth" });
                 }
@@ -48,7 +53,11 @@ const Hero = () => {
               size="lg"
               className="text-lg px-8 py-4"
               onClick={() => {
-                window.location.href = "/create";
+                if (!walletAddress) {
+                  enableWalletDialog.show();
+                } else {
+                  window.location.href = "/create";
+                }
               }}
             >
               Start a Sports Project

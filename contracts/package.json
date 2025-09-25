@@ -1,0 +1,20 @@
+{
+  "name": "crowdgoal-contracts",
+  "version": "1.0.0",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:integration": "set NODE_ENV=integration&& npx hardhat test",
+    "test:production": "set NODE_ENV=production&& npx hardhat test",
+    "export-abi": "rm -rf ../shared/abis && mkdir -p ../shared/abis && cp artifacts/contracts/**/*.json ../shared/abis/"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@types/node": "^24.5.2",
+    "hardhat": "^2.26.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "ethers": "^6.15.0"
+  }
+}
