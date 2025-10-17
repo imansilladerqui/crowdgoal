@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import {
   FaUser,
   FaWallet,
@@ -8,9 +7,10 @@ import {
   FaHeading,
   FaRegCommentDots,
 } from "react-icons/fa";
+import { useCreateProject } from "@/hooks/UseCreateProject";
+import { getWalletAddress } from "@/hooks/UseWalletStorage";
 
 type FormData = {
-  authorWallet: string;
   authorName: string;
   title: string;
   description: string;
@@ -18,17 +18,36 @@ type FormData = {
   expiringDate: string;
 };
 
-export default function CreateProject() {
+const CreateProject = () => {
+  const walletAddress = getWalletAddress();
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormData>({ mode: "onSubmit" });
+    watch,
+  } = useForm<FormData>({ 
+    mode: "onChange",
+    defaultValues: {
+      authorName: "",
+      title: "",
+      description: "",
+      goal: "",
+      expiringDate: "",
+    }
+  });
 
-  const onSubmit = (data: FormData) => {
-    alert("Project submitted!\n" + JSON.stringify(data, null, 2));
-    reset();
+  const { postProject } = useCreateProject();
+
+  const onSubmit = async (data: FormData) => {
+    
+    const result = await postProject(data);
+    if (result.success) {
+      alert("Project submitted to blockchain!");
+      reset();
+    } else {
+      alert("Error: " + result.error);
+    }
   };
 
   return (
@@ -61,22 +80,15 @@ export default function CreateProject() {
                 htmlFor="authorWallet"
               >
                 <FaWallet className="text-purple-400" /> Author Wallet
-                <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 id="authorWallet"
                 type="text"
-                {...register("authorWallet", {
-                  required: "Please enter your wallet address.",
-                })}
-                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400"
+                value={walletAddress}
+                disabled
+                className="cursor-not-allowed w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-gray-200 text-gray-500"
                 placeholder="Wallet address"
               />
-              {errors.authorWallet && (
-                <span className="text-red-500 text-xs mt-1 block">
-                  {errors.authorWallet.message as string}
-                </span>
-              )}
             </div>
             <div>
               <label
@@ -92,8 +104,9 @@ export default function CreateProject() {
                 {...register("authorName", {
                   required: "Please enter your name.",
                 })}
-                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400"
+                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-white"
                 placeholder="Your name"
+                onChange={(e) => console.log("Author name changed:", e.target.value)}
               />
               {errors.authorName && (
                 <span className="text-red-500 text-xs mt-1 block">
@@ -115,7 +128,7 @@ export default function CreateProject() {
                 {...register("title", {
                   required: "Please enter the project title.",
                 })}
-                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400"
+                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-white"
                 placeholder="Project title"
               />
               {errors.title && (
@@ -137,7 +150,7 @@ export default function CreateProject() {
                 {...register("description", {
                   required: "Please describe your project.",
                 })}
-                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400"
+                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-white"
                 rows={3}
                 placeholder="Describe your project"
               />
@@ -163,7 +176,7 @@ export default function CreateProject() {
                 {...register("goal", {
                   required: "Please enter your funding goal in CHZ.",
                 })}
-                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400"
+                className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-white"
                 placeholder="Funding goal in CHZ"
               />
               {errors.goal && (
@@ -216,4 +229,6 @@ export default function CreateProject() {
       </div>
     </div>
   );
-}
+};
+
+export default CreateProject;

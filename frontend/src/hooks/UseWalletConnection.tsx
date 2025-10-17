@@ -6,45 +6,27 @@ declare global {
     ethereum?: EthereumProvider;
   }
 }
-const CHILIZ_CHAIN_ID = import.meta.env.VITE_CHILIZ_CHAIN_ID;
-const CHILIZ_RPC_URL = import.meta.env.VITE_CHILIZ_RPC_URL;
 
-import { useState } from "react";
-import { BrowserProvider, Contract } from "ethers";
-import { setWalletAddress } from "@/hooks/UseWalletStorage";
+import { useState, useEffect } from "react";
+import { CHILIZ_CHAIN_ID, CHILIZ_RPC_URL } from "../config";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
+import { setWalletAddress } from "@/hooks/UseWalletStorage";
+import {
+  ensureCorrectChainOrPrompt,
+  requestAccounts,
+} from "@/lib/web3/network";
+import { normalizeWeb3Error } from "@/lib/web3/errors";
 
 export interface WalletConnection {
   confirmConnectWallet: () => Promise<void>;
   isConnecting: boolean;
   checkWalletRequirements: () => boolean;
-  sendContract: (
-    contractAddress: string,
-    contractABI: readonly unknown[],
-    method: string,
-    args: unknown[]
-  ) => Promise<unknown>;
 }
 
 export const useWalletConnection = (): WalletConnection => {
   const { metamaskDialog, walletErrorDialog, walletRejectedDialog } =
     useWalletDialogs();
 
-  const sendContract = async (
-    contractAddress: string,
-    contractABI: readonly unknown[],
-    method: string,
-    args: unknown[]
-  ): Promise<unknown> => {
-    if (!window.ethereum) throw new Error("MetaMask not found");
-    const provider = new BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const contract = new Contract(contractAddress, contractABI, signer);
-    if (typeof contract[method] !== "function")
-      throw new Error("Contract method not found");
-    const tx = await contract[method](...args);
-    return tx;
-  };
   const [isConnecting, setIsConnecting] = useState(false);
 
   const checkWalletRequirements = () => {
@@ -65,59 +47,48 @@ export const useWalletConnection = (): WalletConnection => {
   const confirmConnectWallet = async () => {
     setIsConnecting(true);
     try {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: CHILIZ_CHAIN_ID,
-            chainName: "Chiliz SpicyNet",
-            nativeCurrency: {
-              name: "CHZ",
-              symbol: "CHZ",
-              decimals: 18,
-            },
-            rpcUrls: [CHILIZ_RPC_URL],
-            blockExplorerUrls: ["https://spicy-explorer.chiliz.com/"],
-          },
-        ],
+      await ensureCorrectChainOrPrompt((msg) => {
+        walletErrorDialog.setMessage(msg);
+        walletErrorDialog.setOpen(true);
       });
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if (!Array.isArray(accounts) || !accounts[0]) {
-        walletErrorDialog.setMessage("No accounts returned from wallet.");
-        walletErrorDialog.show();
+      const account = await requestAccounts();
+      await setWalletAddress(account);
+    } catch (err) {
+      const normalized = normalizeWeb3Error(err);
+      if (normalized.code === 4001) {
+        walletRejectedDialog.setOpen(true);
         return;
       }
-      setWalletAddress(accounts[0]);
-    } catch (err) {
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "code" in err &&
-        (err as { code?: number }).code === 4001
-      ) {
-        walletRejectedDialog.setOpen(true);
-      } else if (typeof err === "object" && err !== null && "message" in err) {
-        walletErrorDialog.setMessage(
-          (err as { message?: string }).message || "Wallet error."
-        );
-        walletErrorDialog.setOpen(true);
-      } else {
-        walletErrorDialog.setMessage(
-          "Wallet connection failed. Please check your network and try again."
-        );
-        walletErrorDialog.setOpen(true);
-      }
+      walletErrorDialog.setMessage(
+        `${normalized.title}\n${normalized.message}`
+      );
+      walletErrorDialog.setOpen(true);
     } finally {
       setIsConnecting(false);
     }
   };
 
+  // Keep local storage in sync if user switches accounts in wallet
+  useEffect(() => {
+    if (!window.ethereum) return;
+    const handler = (accounts: unknown) => {
+      if (Array.isArray(accounts) && accounts[0]) {
+        setWalletAddress(accounts[0] as string);
+      } else {
+        setWalletAddress(null);
+      }
+    };
+    // @ts-expect-error: EIP-1193 event typing not declared in our shim
+    window.ethereum.on?.("accountsChanged", handler);
+    return () => {
+      // @ts-expect-error: EIP-1193 event typing not declared in our shim
+      window.ethereum?.removeListener?.("accountsChanged", handler);
+    };
+  }, []);
+
   return {
     confirmConnectWallet,
     isConnecting,
-    sendContract,
     checkWalletRequirements,
   };
 };
