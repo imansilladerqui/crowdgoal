@@ -3,85 +3,29 @@ import { Button } from "@/components/ui/button";
 import project1 from "@/assets/project-1.jpg";
 import project2 from "@/assets/project-2.jpg";
 import project3 from "@/assets/project-3.jpg";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useCampaigns } from "@/hooks/useCampaigns";
 const ProjectGrid = () => {
-  const projects = [
-    {
-      id: "1",
-      title: "AI-Powered Robotics Platform",
-      description:
-        "Revolutionary robotics platform that combines artificial intelligence with advanced hardware to create autonomous assistants for everyday tasks.",
-      image: project1,
-      goal: 50000,
-      raised: 35000,
-      backers: 245,
-      daysLeft: 15,
-      isLiked: true,
-      status: "open",
-    },
-    {
-      id: "2",
-      title: "Sustainable Energy Grid",
-      description:
-        "Building a decentralized renewable energy network using solar and wind power to create sustainable communities across the globe.",
-      image: project2,
-      goal: 100000,
-      raised: 78000,
-      backers: 520,
-      daysLeft: 8,
-      status: "funded",
-    },
-    {
-      id: "3",
-      title: "Next-Gen Gaming Platform",
-      description:
-        "Immersive gaming experience that blends virtual reality with blockchain technology to create truly owned digital assets.",
-      image: project3,
-      goal: 75000,
-      raised: 23000,
-      backers: 180,
-      daysLeft: 22,
-      status: "open",
-    },
-    {
-      id: "4",
-      title: "AI-Powered Robotics Platform",
-      description:
-        "Revolutionary robotics platform that combines artificial intelligence with advanced hardware.",
-      image: project1,
-      goal: 30000,
-      raised: 12000,
-      backers: 95,
-      daysLeft: 30,
-      status: "open",
-    },
-    {
-      id: "5",
-      title: "Sustainable Energy Grid",
-      description:
-        "Building a decentralized renewable energy network using cutting-edge technology.",
-      image: project2,
-      goal: 80000,
-      raised: 45000,
-      backers: 320,
-      daysLeft: 12,
-      status: "funded",
-    },
-    {
-      id: "6",
-      title: "Next-Gen Gaming Platform",
-      description:
-        "Immersive gaming experience with blockchain integration and true asset ownership.",
-      image: project3,
-      goal: 60000,
-      raised: 55000,
-      backers: 410,
-      daysLeft: 5,
-      status: "funded",
-    },
-  ];
+  const { data, isLoading, isError, refetch, isFetching } = useCampaigns();
+  const projects = useMemo(() => {
+    const now = Date.now();
+    return (data ?? []).map((c) => ({
+      id: String(c.id),
+      title: c.title,
+      description: c.description,
+      image: [project1, project2, project3][c.id % 3],
+      goal: c.goal,
+      raised: c.raised,
+      backers: c.backers,
+      daysLeft: Math.max(
+        0,
+        Math.ceil((c.expiringDate * 1000 - now) / (1000 * 60 * 60 * 24))
+      ),
+      status: c.status,
+    }));
+  }, [data]);
 
-  const statuses = ["open", "funded"];
+  const statuses = ["open", "funded", "failed", "finalized"] as const;
   const [selectedStatus, setSelectedStatus] = useState<string>("open");
 
   const filterProjectsByStatus = (status: string) => {
@@ -116,22 +60,33 @@ const ProjectGrid = () => {
               {status.charAt(0).toUpperCase() + status.slice(1)}
             </Button>
           ))}
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            {isFetching ? "Refreshing..." : "Refresh"}
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filterProjectsByStatus(selectedStatus).map((project) => (
-            <ProjectCard key={project.id} {...project} />
-          ))}
-        </div>
-
-        {filterProjectsByStatus(selectedStatus).length <
-          projects.filter((p) => p.status === selectedStatus).length && (
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Projects
-            </Button>
+        {isLoading || isFetching ? (
+          <div className="text-center text-foreground/70">
+            Loading projects...
+          </div>
+        ) : isError ? (
+          <div className="text-center text-red-500">
+            Failed to load projects. Try refresh.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {filterProjectsByStatus(selectedStatus).map((project) => (
+              <ProjectCard key={project.id} {...project} />
+            ))}
           </div>
         )}
+
+        {/* Pagination placeholder retained; backend currently returns all campaigns */}
       </div>
     </section>
   );
