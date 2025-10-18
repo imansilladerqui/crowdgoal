@@ -11,6 +11,7 @@ import ChainReadinessBanner from "@/components/ChainReadinessBanner";
 
 const CreateProject = lazy(() => import("./pages/Createproject"));
 const About = lazy(() => import("./pages/About"));
+const CampaignDetails = lazy(() => import("./pages/CampaignDetails"));
 
 const parseRetryAfterMs = (error: unknown): number | undefined => {
   try {
@@ -78,6 +79,14 @@ const App = () => (
               element={
                 <Suspense fallback={<div className="p-6">Loading...</div>}>
                   <About />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/campaign/:id"
+              element={
+                <Suspense fallback={<div className="p-6">Loading...</div>}>
+                  <CampaignDetails />
                 </Suspense>
               }
             />
