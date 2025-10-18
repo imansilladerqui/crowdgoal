@@ -9,8 +9,10 @@ import {
 } from "react-icons/fa";
 import { useCreateProject } from "@/hooks/UseCreateProject";
 import { getWalletAddress } from "@/hooks/UseWalletStorage";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 
 type FormData = {
+  authorWallet: string;
   authorName: string;
   title: string;
   description: string;
@@ -20,15 +22,17 @@ type FormData = {
 
 const CreateProject = () => {
   const walletAddress = getWalletAddress();
+  const { successDialog } = useWalletDialogs();
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
   } = useForm<FormData>({ 
     mode: "onChange",
     defaultValues: {
+      authorWallet: walletAddress || "",
       authorName: "",
       title: "",
       description: "",
@@ -40,15 +44,22 @@ const CreateProject = () => {
   const { postProject } = useCreateProject();
 
   const onSubmit = async (data: FormData) => {
-    
-    const result = await postProject(data);
-    if (result.success) {
-      alert("Project submitted to blockchain!");
-      reset();
-    } else {
-      alert("Error: " + result.error);
+    try {
+      const result = await postProject(data);
+      if (result.success) {
+        successDialog.show({
+          campaignId: result.campaignId,
+          txHash: result.txHash
+        });
+        reset();
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      alert("An unexpected error occurred. Please try again.");
     }
   };
+
 
   return (
     <div className="py-12 px-4 w-full min-h-screen bg-black">
@@ -106,7 +117,6 @@ const CreateProject = () => {
                 })}
                 className="w-full border-2 border-blue-100 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300 text-base font-semibold text-black placeholder:font-semibold placeholder:text-base placeholder:text-gray-400 bg-white"
                 placeholder="Your name"
-                onChange={(e) => console.log("Author name changed:", e.target.value)}
               />
               {errors.authorName && (
                 <span className="text-red-500 text-xs mt-1 block">
@@ -219,9 +229,15 @@ const CreateProject = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-3 bg-purple-600 text-white rounded-lg font-bold text-lg shadow hover:bg-purple-700 transition-all"
+                disabled={!walletAddress}
+                className={`px-5 py-3 rounded-lg font-bold text-lg shadow transition-all ${
+                  walletAddress 
+                    ? "bg-purple-600 text-white hover:bg-purple-700" 
+                    : "bg-gray-500 text-gray-300 cursor-not-allowed"
+                }`}
+                title={!walletAddress ? "Please connect your wallet first" : ""}
               >
-                Submit
+                {walletAddress ? "Create Project" : "Connect Wallet First"}
               </button>
             </div>
           </form>
