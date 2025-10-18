@@ -4,6 +4,7 @@ import { WalletDialogContext } from "../context/WalletDialogContext";
 export const WalletDialogProvider = ({ children }) => {
   const enableWalletDialog = useDialog();
   const logoutDialog = useDialog();
+  const successDialog = useDialog();
   const metamaskDialog = useDialog();
   const walletConsentDialog = useDialog();
   const walletErrorDialog = useDialog();
@@ -18,6 +19,7 @@ export const WalletDialogProvider = ({ children }) => {
         walletConsentDialog,
         walletErrorDialog,
         walletRejectedDialog,
+        successDialog,
       }}
     >
       {children}

@@ -276,9 +276,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **Project Maintainer**: [Your Name](https://github.com/yourusername)
-- **Email**: your.email@example.com
-- **Twitter**: [@yourtwitter](https://twitter.com/yourtwitter)
+- **Project Maintainer**: [Ignacio Mansilla Derqui](https://github.com/imansilladerqui)
+- **Email**: imansilladerqui@hotmail.com
 
 ---
 

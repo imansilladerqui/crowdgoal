@@ -1,0 +1,13 @@
+# Browsers that we support
+
+# Modern browsers with ES2020 support
+last 2 versions
+> 1%
+not dead
+not ie 11
+
+# Specific targets for better performance
+Chrome >= 80
+Firefox >= 78
+Safari >= 14
+Edge >= 80

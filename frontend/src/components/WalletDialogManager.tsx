@@ -4,6 +4,7 @@ import WalletRejectedDialog from "@/components/dialogs/WalletRejectedDialog";
 import WalletErrorDialog from "@/components/dialogs/WalletErrorDialog";
 import WalletConsentDrawer from "@/components/dialogs/WalletConsentDrawer";
 import LogoutDialog from "@/components/dialogs/LogoutDialog";
+import SuccessDialog from "@/components/dialogs/SuccessDialog";
 import { useWalletConnection } from "@/hooks/UseWalletConnection";
 import { setWalletAddress } from "@/hooks/UseWalletStorage";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
@@ -15,6 +16,7 @@ const WalletDialogManager = () => {
     walletConsentDialog,
     walletErrorDialog,
     walletRejectedDialog,
+    successDialog
   } = useWalletDialogs();
   const { confirmConnectWallet, isConnecting } = useWalletConnection();
 
@@ -58,6 +60,10 @@ const WalletDialogManager = () => {
           logoutDialog.setOpen(false);
         }}
         onCancel={() => logoutDialog.setOpen(false)}
+      />
+      <SuccessDialog
+        isOpen={successDialog.open}
+        onClose={successDialog.hide}
       />
     </>
   );
