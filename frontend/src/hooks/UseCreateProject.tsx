@@ -34,6 +34,8 @@ export const useCreateProject = () => {
       // Prepare contract arguments
       const contractArgs = prepareContractArguments(data);
 
+      console.log(contractArgs);
+
       // Estimate gas and execute transaction
       const gasEstimate = await contract.createCampaign.estimateGas(...contractArgs);
       const tx = await contract.createCampaign(...contractArgs, {
@@ -99,7 +101,7 @@ const prepareContractArguments = (data: FormData) => {
     throw new Error("Invalid goal amount. Please enter a valid number.");
   }
   
-  const expiringTimestamp = Math.floor(new Date(data.expiringDate).getTime() / 1000);
+  const expiringTimestamp = parseInt(data.expiringDate);
   const tokenAddress = ZeroAddress; 
   const metadataURI = ""; 
 
