@@ -48,6 +48,8 @@ export function useCampaigns() {
         expiringDate: Number(c.expiringDate),
         status: enumToStatus(Number(c.status)),
         backers: donorCounts[idx] ?? 0,
+        authorName: String(c.authorName),
+        authorWallet: String(c.authorWallet),
       }));
     },
   });

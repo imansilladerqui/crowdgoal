@@ -5,6 +5,8 @@ import WalletErrorDialog from "@/components/dialogs/WalletErrorDialog";
 import WalletConsentDrawer from "@/components/dialogs/WalletConsentDrawer";
 import LogoutDialog from "@/components/dialogs/LogoutDialog";
 import SuccessDialog from "@/components/dialogs/SuccessDialog";
+import { ThankYouDialog } from "@/components/dialogs/ThankYouDialog";
+import { DonationDialog } from "@/components/DonationDialog";
 import { useWalletConnection } from "@/hooks/UseWalletConnection";
 import { setWalletAddress } from "@/hooks/UseWalletStorage";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
@@ -16,7 +18,9 @@ const WalletDialogManager = () => {
     walletConsentDialog,
     walletErrorDialog,
     walletRejectedDialog,
-    successDialog
+    successDialog,
+    thankYouDialog,
+    donationDialog
   } = useWalletDialogs();
   const { confirmConnectWallet, isConnecting } = useWalletConnection();
 
@@ -62,8 +66,29 @@ const WalletDialogManager = () => {
         onCancel={() => logoutDialog.setOpen(false)}
       />
       <SuccessDialog
-        isOpen={successDialog.open}
-        onClose={successDialog.hide}
+        open={successDialog.open}
+        onOpenChange={successDialog.setOpen}
+        title={successDialog.message?.title}
+        message={successDialog.message?.message}
+      />
+      <ThankYouDialog
+        open={thankYouDialog.open}
+        onOpenChange={thankYouDialog.setOpen}
+        campaignTitle={thankYouDialog.message?.campaignTitle}
+        donationAmount={thankYouDialog.message?.donationAmount}
+      />
+      <DonationDialog
+        open={donationDialog.open}
+        onOpenChange={donationDialog.setOpen}
+        campaignId={donationDialog.message?.campaignId}
+        campaignTitle={donationDialog.message?.campaignTitle}
+        onSuccess={(amount) => {
+          thankYouDialog.setMessage({
+            campaignTitle: donationDialog.message?.campaignTitle,
+            donationAmount: amount,
+          });
+          thankYouDialog.show();
+        }}
       />
     </>
   );

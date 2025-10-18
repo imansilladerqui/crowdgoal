@@ -9,6 +9,8 @@ export const WalletDialogProvider = ({ children }) => {
   const walletConsentDialog = useDialog();
   const walletErrorDialog = useDialog();
   const walletRejectedDialog = useDialog();
+  const thankYouDialog = useDialog();
+  const donationDialog = useDialog();
 
   return (
     <WalletDialogContext.Provider
@@ -20,6 +22,8 @@ export const WalletDialogProvider = ({ children }) => {
         walletErrorDialog,
         walletRejectedDialog,
         successDialog,
+        thankYouDialog,
+        donationDialog,
       }}
     >
       {children}

@@ -69,6 +69,13 @@ const validateFormData = (data: FormData): string | null => {
   if (!data.authorWallet) {
     return "Please connect your wallet";
   }
+  
+  // Validate goal is a valid number
+  const goalNumber = parseFloat(data.goal);
+  if (isNaN(goalNumber) || goalNumber <= 0) {
+    return "Please enter a valid goal amount";
+  }
+  
   return null;
 };
 
@@ -85,7 +92,13 @@ const getContractInstance = async () => {
 };
 
 const prepareContractArguments = (data: FormData) => {
-  const goalInWei = parseEther(data.goal);
+  let goalInWei;
+  try {
+    goalInWei = parseEther(data.goal);
+  } catch (error) {
+    throw new Error("Invalid goal amount. Please enter a valid number.");
+  }
+  
   const expiringTimestamp = Math.floor(new Date(data.expiringDate).getTime() / 1000);
   const tokenAddress = ZeroAddress; 
   const metadataURI = ""; 

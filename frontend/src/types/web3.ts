@@ -9,6 +9,8 @@ export interface OnChainCampaign {
   expiringDate: number;
   status: CampaignStatus;
   backers: number;
+  authorName: string;
+  authorWallet: string;
 }
 
 export type CreateCampaignArgs = [

@@ -1,58 +1,68 @@
 import React from 'react';
-import { FaCheckCircle, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { CheckCircle, X, Home } from "lucide-react";
 
 interface SuccessDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  message?: string;
 }
 
 const SuccessDialog: React.FC<SuccessDialogProps> = ({ 
-  isOpen, 
-  onClose, 
+  open, 
+  onOpenChange,
+  title = "Project Created Successfully!",
+  message = "Your crowdfunding campaign has been successfully created and submitted to the blockchain!"
 }) => {
-  if (!isOpen) return null;
-
   const handleClose = () => {
-    onClose();
+    onOpenChange(false);
     // Redirect to home page
     window.location.href = '/';
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <FaTimes size={20} />
-        </button>
-
-        {/* Success icon */}
-        <div className="flex justify-center mb-4">
-          <FaCheckCircle className="text-green-500" size={64} />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
+          <DialogTitle className="text-2xl font-bold text-green-600">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-lg">
+            {message}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 py-4">
+          <div className="rounded-lg bg-green-50 p-4 text-center">
+            <p className="text-sm text-green-700">
+              Your project is now live and ready to receive donations from the community!
+            </p>
+          </div>
         </div>
 
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">
-          Project Created Successfully!
-        </h2>
-
-        {/* Message */}
-        <p className="text-gray-600 text-center mb-6">
-          Your crowdfunding campaign has been successfully created and submitted to the blockchain!
-        </p>
-
-        {/* Close button */}
-        <button
-          onClick={handleClose}
-          className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-        >
-          Close & Go to Home
-        </button>
-      </div>
-    </div>
+        <DialogFooter>
+          <Button
+            onClick={handleClose}
+            className="w-full"
+          >
+            <Home className="mr-2 h-4 w-4" />
+            Close & Go to Home
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
