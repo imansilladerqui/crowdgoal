@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { CheckCircle, X, Home } from "lucide-react";
+import { Check, X, Home } from "lucide-react";
 
 interface SuccessDialogProps {
   open: boolean;
@@ -34,7 +34,7 @@ const SuccessDialog: React.FC<SuccessDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+            <Check className="h-8 w-8 text-green-600" />
           </div>
           <DialogTitle className="text-2xl font-bold text-green-600">
             {title}
@@ -44,21 +44,13 @@ const SuccessDialog: React.FC<SuccessDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-          <div className="rounded-lg bg-green-50 p-4 text-center">
-            <p className="text-sm text-green-700">
-              Your project is now live and ready to receive donations from the community!
-            </p>
-          </div>
-        </div>
-
         <DialogFooter>
           <Button
             onClick={handleClose}
             className="w-full"
           >
             <Home className="mr-2 h-4 w-4" />
-            Close & Go to Home
+            Home
           </Button>
         </DialogFooter>
       </DialogContent>

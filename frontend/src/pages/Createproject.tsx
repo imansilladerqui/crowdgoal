@@ -355,7 +355,7 @@ const CreateProject = () => {
                 }`}
                 title={!walletAddress ? "Please connect your wallet first" : !selectedDate ? "Please select an expiring date" : ""}
               >
-                {!walletAddress ? "Connect Wallet First" : !selectedDate ? "Select Date First" : "Create Project"}
+                {!walletAddress ? "Connect Wallet First" : "Create Project"}
               </button>
             </div>
           </form>
