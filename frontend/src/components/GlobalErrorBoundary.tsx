@@ -14,13 +14,10 @@ export class GlobalErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // Optional: send to analytics/logging here
-    console.error("Uncaught error:", error, info);
   }
 
   handleRetry = () => {
     this.setState({ error: undefined });
-    // Prefer a soft reload
     window.location.reload();
   };
 

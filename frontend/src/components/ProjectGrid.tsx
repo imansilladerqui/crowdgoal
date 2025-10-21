@@ -1,9 +1,6 @@
 import ProjectCard from "./ProjectCard";
 import ProjectCardSkeleton from "./ProjectCardSkeleton";
 import { Button } from "@/components/ui/button";
-import project1 from "@/assets/project-1.jpg";
-import project2 from "@/assets/project-2.jpg";
-import project3 from "@/assets/project-3.jpg";
 import { useMemo, useState, useEffect } from "react";
 import { useCampaigns } from "@/hooks/useCampaigns";
 const ProjectGrid = () => {
@@ -14,7 +11,6 @@ const ProjectGrid = () => {
       id: String(c.id),
       title: c.title,
       description: c.description,
-      image: [project1, project2, project3][c.id % 3],
       goal: c.goal,
       raised: c.raised,
       backers: c.backers,

@@ -50,7 +50,6 @@ export const DonationDialog = ({
         alert(result.error || "Donation failed");
       }
     } catch (error) {
-      console.error("Donation error:", error);
       alert("An unexpected error occurred");
     } finally {
       setIsLoading(false);
