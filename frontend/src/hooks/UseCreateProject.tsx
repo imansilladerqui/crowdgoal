@@ -21,28 +21,22 @@ type CreateProjectResult = {
 export const useCreateProject = () => {
   const postProject = async (data: FormData): Promise<CreateProjectResult> => {
     try {
-      // Validate form data
       const validationError = validateFormData(data);
       if (validationError) {
         return { success: false, error: validationError };
       }
 
-      // Ensure correct network and get contract instance
       await ensureCorrectChainOrPrompt();
       const { contract } = await getContractInstance();
 
-      // Prepare contract arguments
       const contractArgs = prepareContractArguments(data);
 
-      console.log(contractArgs);
 
-      // Estimate gas and execute transaction
       const gasEstimate = await contract.createCampaign.estimateGas(...contractArgs);
       const tx = await contract.createCampaign(...contractArgs, {
-        gasLimit: gasEstimate * BigInt(120) / BigInt(100) // Add 20% buffer
+        gasLimit: gasEstimate * BigInt(120) / BigInt(100)
       });
 
-      // Wait for confirmation and extract campaign ID
       const receipt = await tx.wait();
       const campaignId = extractCampaignIdFromReceipt(receipt, contract);
 
@@ -63,7 +57,6 @@ export const useCreateProject = () => {
   return { postProject };
 };
 
-// Helper functions for better code organization
 const validateFormData = (data: FormData): string | null => {
   if (!data.authorName || !data.title || !data.description || !data.goal || !data.expiringDate) {
     return "Please fill in all required fields";
@@ -72,7 +65,6 @@ const validateFormData = (data: FormData): string | null => {
     return "Please connect your wallet";
   }
   
-  // Validate goal is a valid number
   const goalNumber = parseFloat(data.goal);
   if (isNaN(goalNumber) || goalNumber <= 0) {
     return "Please enter a valid goal amount";

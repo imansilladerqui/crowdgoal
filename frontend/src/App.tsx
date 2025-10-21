@@ -12,6 +12,10 @@ import ChainReadinessBanner from "@/components/ChainReadinessBanner";
 const CreateProject = lazy(() => import("./pages/Createproject"));
 const About = lazy(() => import("./pages/About"));
 const CampaignDetails = lazy(() => import("./pages/CampaignDetails"));
+const Profile = lazy(() => import("./pages/Profile"));
+const MyCampaigns = lazy(() => import("./pages/MyCampaigns"));
+const MyDonations = lazy(() => import("./pages/MyDonations"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const parseRetryAfterMs = (error: unknown): number | undefined => {
   try {
@@ -90,6 +94,39 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <Suspense fallback={<div className="p-6">Loading...</div>}>
+                  <Profile />
+                </Suspense>
+              }
+            >
+              <Route
+                path="my-campaigns"
+                element={
+                  <Suspense fallback={<div className="p-6">Loading...</div>}>
+                    <MyCampaigns />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="my-donations"
+                element={
+                  <Suspense fallback={<div className="p-6">Loading...</div>}>
+                    <MyDonations />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="admin"
+                element={
+                  <Suspense fallback={<div className="p-6">Loading...</div>}>
+                    <AdminPanel />
+                  </Suspense>
+                }
+              />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

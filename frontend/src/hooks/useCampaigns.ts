@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { OnChainCampaign, CampaignStatus } from "@/types/web3";
+import { formatCHZ } from "@/lib/utils/formatCHZ";
 
 const enumToStatus = (statusValue: number): CampaignStatus => {
   switch (statusValue) {

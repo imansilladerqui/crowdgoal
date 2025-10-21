@@ -22,6 +22,8 @@ import {
   Heart
 } from "lucide-react";
 import { useState } from "react";
+import { formatCHZ } from "@/lib/utils/formatCHZ";
+import { getCampaignStatusInfo } from "@/lib/utils/statusInfo";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -92,39 +94,8 @@ const CampaignDetails = () => {
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
   const daysLeft = Math.max(0, Math.ceil((campaign.expiringDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
   
-  const formatCHZ = (amount: number) => {
-    const chzAmount = amount / Math.pow(10, 18);
-    
-    if (chzAmount >= 1000000) {
-      return `${(chzAmount / 1000000).toFixed(1)}M`;
-    } else if (chzAmount >= 1000) {
-      return `${(chzAmount / 1000).toFixed(1)}K`;
-    } else if (chzAmount >= 1) {
-      return chzAmount.toFixed(1);
-    } else {
-      return chzAmount.toFixed(3);
-    }
-  };
-
-  const getStatusVariant = (status: number) => {
-    switch (status) {
-      case 1: return 'success'; // Funded
-      case 2: return 'destructive'; // Failed
-      case 3: return 'info'; // Finalized
-      case 0:
-      default: return 'default'; // Active
-    }
-  };
-
-  const getStatusText = (status: number) => {
-    switch (status) {
-      case 1: return 'Funded';
-      case 2: return 'Failed';
-      case 3: return 'Finalized';
-      case 0:
-      default: return 'Active';
-    }
-  };
+  // Get status info using utility
+  const getStatusInfo = () => getCampaignStatusInfo(campaign.status);
 
   const isUrgent = daysLeft <= 3 && campaign.status === 0;
   const isSuccessful = campaign.status === 1 || campaign.status === 3;
@@ -134,9 +105,8 @@ const CampaignDetails = () => {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy URL:', err);
     }
   };
 
@@ -158,8 +128,8 @@ const CampaignDetails = () => {
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <Badge variant={getStatusVariant(campaign.status)}>
-                  {getStatusText(campaign.status)}
+                <Badge variant={getStatusInfo().variant}>
+                  {getStatusInfo().text}
                 </Badge>
                 {isUrgent && (
                   <Badge variant="warning" className="animate-pulse">
@@ -175,15 +145,6 @@ const CampaignDetails = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Campaign Image */}
-        <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-          <img 
-            src={`/api/placeholder/800/400`} 
-            alt={campaign.title}
-            className="w-full h-full object-cover"
-          />
         </div>
 
         {/* Campaign Stats */}

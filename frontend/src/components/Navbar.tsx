@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useWalletConnection } from "@/hooks/UseWalletConnection";
 import { getWalletAddress, setWalletAddress } from "@/hooks/UseWalletStorage";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
+import ProfileDropdown from "@/components/ProfileDropdown";
 
 const Navbar = () => {
   const walletAddress = getWalletAddress();
@@ -56,6 +57,7 @@ const Navbar = () => {
                   <Wallet className="h-4 w-4" />
                   {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
                 </Button>
+                <ProfileDropdown />
               </>
             ) : (
               <Button
