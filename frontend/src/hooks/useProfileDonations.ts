@@ -4,6 +4,7 @@ import { BrowserProvider } from "ethers";
 import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { getWalletAddress } from "@/hooks/UseWalletStorage";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 
 
 export interface ProfileDonation {
@@ -21,6 +22,7 @@ export interface ProfileDonation {
 
 export const useProfileDonations = () => {
   const [claimingRefunds, setClaimingRefunds] = useState<Set<number>>(new Set());
+  const { refundSuccessDialog, refundErrorDialog } = useWalletDialogs();
   const walletAddress = getWalletAddress();
 
   const { data: donations, isLoading, refetch } = useQuery({
@@ -64,7 +66,8 @@ export const useProfileDonations = () => {
 
   const handleClaimRefund = async (campaignId: number) => {
     if (!window.ethereum) {
-      alert("Wallet not available");
+      refundErrorDialog.setMessage('Please connect your wallet to claim refunds.');
+      refundErrorDialog.show();
       return;
     }
 
@@ -78,10 +81,12 @@ export const useProfileDonations = () => {
       const tx = await contract.claimRefund(campaignId);
       await tx.wait();
 
-      alert("Refund claimed successfully!");
+      refundSuccessDialog.setMessage('Your refund has been successfully claimed and sent to your wallet.');
+      refundSuccessDialog.show();
       refetch();
     } catch (error: any) {
-      alert(`Refund claim failed: ${error.message}`);
+      refundErrorDialog.setMessage(error.message || 'There was an error processing your refund claim. Please try again.');
+      refundErrorDialog.show();
     } finally {
       setClaimingRefunds(prev => {
         const newSet = new Set(prev);

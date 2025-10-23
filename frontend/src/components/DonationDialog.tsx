@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { useDonation } from "../hooks/useDonation";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 import { Loader2, Coins } from "lucide-react";
 
 interface DonationDialogProps {
@@ -31,6 +32,7 @@ export const DonationDialog = ({
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { donate } = useDonation();
+  const { unexpectedErrorDialog } = useWalletDialogs();
 
   const handleDonate = async () => {
     if (!amount || parseFloat(amount) <= 0) return;
@@ -50,7 +52,8 @@ export const DonationDialog = ({
         alert(result.error || "Donation failed");
       }
     } catch (error) {
-      alert("An unexpected error occurred");
+      unexpectedErrorDialog.setMessage("An unexpected error occurred");
+      unexpectedErrorDialog.show();
     } finally {
       setIsLoading(false);
     }
