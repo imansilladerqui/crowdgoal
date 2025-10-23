@@ -4,6 +4,7 @@ import { BrowserProvider } from "ethers";
 import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { getWalletAddress } from "@/hooks/UseWalletStorage";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 
 export interface ProfileCampaign {
   id: number;
@@ -21,6 +22,7 @@ export interface ProfileCampaign {
 
 export const useProfileMyCampaigns = () => {
   const [withdrawingCampaigns, setWithdrawingCampaigns] = useState<Set<number>>(new Set());
+  const { withdrawalSuccessDialog, withdrawalErrorDialog } = useWalletDialogs();
   const walletAddress = getWalletAddress();
 
   const { data: campaigns, isLoading, refetch } = useQuery({
@@ -83,7 +85,8 @@ export const useProfileMyCampaigns = () => {
 
   const handleWithdrawFunds = async (campaignId: number) => {
     if (!window.ethereum) {
-      alert("Wallet not available");
+      withdrawalErrorDialog.setMessage('Please connect your wallet to withdraw funds.');
+      withdrawalErrorDialog.show();
       return;
     }
 
@@ -97,10 +100,12 @@ export const useProfileMyCampaigns = () => {
       const tx = await contract.withdrawFunds(campaignId);
       await tx.wait();
 
-      alert("Funds withdrawn successfully!");
+      withdrawalSuccessDialog.setMessage('Your campaign funds have been successfully withdrawn to your wallet.');
+      withdrawalSuccessDialog.show();
       refetch();
     } catch (error: any) {
-      alert(`Withdrawal failed: ${error.message}`);
+      withdrawalErrorDialog.setMessage(error.message || 'There was an error processing your withdrawal request. Please try again.');
+      withdrawalErrorDialog.show();
     } finally {
       setWithdrawingCampaigns(prev => {
         const newSet = new Set(prev);

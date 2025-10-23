@@ -26,7 +26,7 @@ type FormData = {
 
 const CreateProject = () => {
   const walletAddress = getWalletAddress();
-  const { successDialog } = useWalletDialogs();
+  const { successDialog, unexpectedErrorDialog } = useWalletDialogs();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   const {
@@ -86,7 +86,8 @@ const CreateProject = () => {
         alert(`Error: ${result.error}`);
       }
     } catch (error) {
-      alert("An unexpected error occurred. Please try again.");
+      unexpectedErrorDialog.setMessage("An unexpected error occurred. Please try again.");
+      unexpectedErrorDialog.show();
     }
   };
 
