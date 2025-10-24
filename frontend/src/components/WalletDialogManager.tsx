@@ -32,7 +32,7 @@ const WalletDialogManager = () => {
       />
       <MetaMaskDialog
         open={metamaskDialog.open}
-        onCancel={() => walletConsentDialog.setOpen(false)}
+        onCancel={() => metamaskDialog.setOpen(false)}
       />
       <WalletRejectedDialog
         open={walletRejectedDialog.open}
