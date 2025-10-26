@@ -17,7 +17,7 @@ const features = [
   {
     icon: <ShieldCheck className="h-6 w-6 text-primary" />,
     title: "Fan-Powered & Secure",
-    desc: "Every project is sports-focused. Smart contracts guarantee transparent funding and automatic refunds if goals aren’t met.",
+    desc: "Every project is sports-focused. Smart contracts guarantee transparent funding and claimable refunds if goals aren't met.",
   },
   {
     icon: <Globe className="h-6 w-6 text-primary" />,
@@ -31,8 +31,8 @@ const features = [
   },
   {
     icon: <RefreshCw className="h-6 w-6 text-primary" />,
-    title: "Automatic Refunds",
-    desc: "If a campaign fails, contributors get their funds back instantly.",
+    title: "Claim Refunds",
+    desc: "If a campaign fails, contributors can claim their funds back after it expires.",
   },
   {
     icon: <Users className="h-6 w-6 text-primary" />,

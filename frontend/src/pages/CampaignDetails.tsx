@@ -24,6 +24,7 @@ import {
 import { useState } from "react";
 import { formatCHZ } from "@/lib/utils/formatCHZ";
 import { getCampaignStatusInfo } from "@/lib/utils/statusInfo";
+import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -94,11 +95,18 @@ const CampaignDetails = () => {
   const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
   const daysLeft = Math.max(0, Math.ceil((campaign.expiringDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
   
+  const computedStatus = getComputedCampaignStatus(
+    campaign.status,
+    campaign.expiringDate,
+    campaign.raised,
+    campaign.goal
+  );
+  
   // Get status info using utility
-  const getStatusInfo = () => getCampaignStatusInfo(campaign.status);
+  const getStatusInfo = () => getCampaignStatusInfo(computedStatus);
 
-  const isUrgent = daysLeft <= 3 && campaign.status === 0;
-  const isSuccessful = campaign.status === 1 || campaign.status === 3;
+  const isUrgent = daysLeft <= 3 && computedStatus === 0;
+  const isSuccessful = computedStatus === 1 || computedStatus === 3;
 
   const copyUrl = async () => {
     try {

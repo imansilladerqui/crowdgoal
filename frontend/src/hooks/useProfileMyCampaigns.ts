@@ -5,6 +5,7 @@ import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { getWalletAddress } from "@/hooks/UseWalletStorage";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
+import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
 
 export interface ProfileCampaign {
   id: number;
@@ -60,14 +61,21 @@ export const useProfileMyCampaigns = () => {
         );
         
         const mappedCampaigns = campaignsWithDonors.map((campaign: any) => {
+          const onChainStatus = Number(campaign[6] || 0);
+          const expiringDate = Number(campaign[5]);
+          const raised = Number(campaign[4]);
+          const goal = Number(campaign[3]);
+          
+          const computedStatus = getComputedCampaignStatus(onChainStatus, expiringDate, raised, goal);
+          
           return {
             id: Number(campaign[0]),
             title: String(campaign[9] || "Untitled Campaign"),
             description: String(campaign[10] || "No description provided"),
-            goal: Number(campaign[3]),
-            raised: Number(campaign[4]),
-            expiringDate: Number(campaign[5]),
-            status: Number(campaign[6] || 0),
+            goal,
+            raised,
+            expiringDate,
+            status: computedStatus, 
             fundsWithdrawn: Boolean(campaign[7] || false),
             authorName: String(campaign[8] || "Unknown Author"),
             authorWallet: String(campaign[1] || ""),
