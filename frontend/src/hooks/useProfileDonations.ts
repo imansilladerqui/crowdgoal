@@ -5,6 +5,7 @@ import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { getWalletAddress } from "@/hooks/UseWalletStorage";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
+import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
 
 
 export interface ProfileDonation {
@@ -36,20 +37,26 @@ export const useProfileDonations = () => {
       const allCampaigns = await contract.getAllCampaigns();
       const myDonations: ProfileDonation[] = [];
       
-      // Check each campaign for donations from current user
       for (const campaign of allCampaigns) {
         try {
           const donationAmount = await contract.getDonation(campaign.id, walletAddress);
           if (donationAmount > 0) {
             const donors = await contract.getCampaignDonors(campaign.id);
+            const onChainStatus = Number(campaign.status);
+            const expiringDate = Number(campaign.expiringDate);
+            const raised = Number(campaign.raised);
+            const goal = Number(campaign.goal);
+            
+            const computedStatus = getComputedCampaignStatus(onChainStatus, expiringDate, raised, goal);
+            
             myDonations.push({
               campaignId: Number(campaign.id),
               campaignTitle: String(campaign.title),
               campaignDescription: String(campaign.description),
-              campaignGoal: Number(campaign.goal),
-              campaignRaised: Number(campaign.raised),
-              campaignExpiringDate: Number(campaign.expiringDate),
-              campaignStatus: Number(campaign.status),
+              campaignGoal: goal,
+              campaignRaised: raised,
+              campaignExpiringDate: expiringDate,
+              campaignStatus: computedStatus, 
               campaignAuthorName: String(campaign.authorName),
               donationAmount: Number(donationAmount),
               donorCount: donors.length
@@ -96,9 +103,18 @@ export const useProfileDonations = () => {
     }
   };
 
-  // Computed values
+  // Computed values - check for failed campaigns (where users can claim refunds)
   const totalDonated = donations?.reduce((sum, donation) => sum + donation.donationAmount, 0) || 0;
-  const failedDonations = donations?.filter(d => d.campaignStatus === 2) || [];
+  const failedDonations = donations?.filter(d => {
+    // Use computed status which considers expiration
+    const computedStatus = getComputedCampaignStatus(
+      d.campaignStatus,
+      d.campaignExpiringDate,
+      d.campaignRaised,
+      d.campaignGoal
+    );
+    return computedStatus === 2; // Failed campaigns allow refunds
+  }) || [];
   const canClaimRefunds = failedDonations.length > 0;
 
   return {

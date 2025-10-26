@@ -2,20 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { OnChainCampaign, CampaignStatus } from "@/types/web3";
-import { formatCHZ } from "@/lib/utils/formatCHZ";
+import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
 
 const enumToStatus = (statusValue: number): CampaignStatus => {
   switch (statusValue) {
-    case 0:
-      return "open"; // Active
-    case 1:
-      return "funded"; // Successful
-    case 2:
-      return "failed"; // Failed
-    case 3:
-      return "finalized"; // Finalized
-    default:
-      return "open";
+    case 0: return "open"; 
+    case 1: return "funded"; 
+    case 2: return "failed"; 
+    case 3: return "finalized"; 
+    default: return "open";
   }
 };
 
@@ -28,7 +23,6 @@ export function useCampaigns() {
 
       const campaigns: any[] = await contract.getAllCampaigns();
 
-      // Fetch donor counts in parallel for each campaign
       const donorCounts: number[] = await Promise.all(
         campaigns.map(async (c) => {
           try {
@@ -40,18 +34,27 @@ export function useCampaigns() {
         })
       );
 
-      return campaigns.map((c, idx) => ({
-        id: Number(c.id),
-        title: String(c.title),
-        description: String(c.description),
-        goal: Number(c.goal),
-        raised: Number(c.raised),
-        expiringDate: Number(c.expiringDate),
-        status: enumToStatus(Number(c.status)),
-        backers: donorCounts[idx] ?? 0,
-        authorName: String(c.authorName),
-        authorWallet: String(c.authorWallet),
-      }));
+      return campaigns.map((c, idx) => {
+        const onChainStatus = Number(c.status);
+        const expiringDate = Number(c.expiringDate);
+        const raised = Number(c.raised);
+        const goal = Number(c.goal);
+        
+        const computedStatus = getComputedCampaignStatus(onChainStatus, expiringDate, raised, goal);
+        
+        return {
+          id: Number(c.id),
+          title: String(c.title),
+          description: String(c.description),
+          goal,
+          raised,
+          expiringDate,
+          status: enumToStatus(computedStatus), 
+          backers: donorCounts[idx] ?? 0,
+          authorName: String(c.authorName),
+          authorWallet: String(c.authorWallet),
+        };
+      });
     },
   });
 }

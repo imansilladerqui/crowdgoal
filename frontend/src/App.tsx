@@ -19,11 +19,9 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const parseRetryAfterMs = (error: unknown): number | undefined => {
   try {
-    // axios-like
     const header1 = (
       error as { response?: { headers?: Record<string, string> } }
     )?.response?.headers?.["retry-after"];
-    // fetch-like
     const header2 = (
       error as { headers?: { get?: (k: string) => string | null } }
     )?.headers?.get?.("Retry-After");
@@ -41,7 +39,6 @@ const parseRetryAfterMs = (error: unknown): number | undefined => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Do not retry for user-driven wallet errors; otherwise up to 3 attempts
       retry: (failureCount, error) => {
         if (failureCount >= 3) return false;
         const n = normalizeWeb3Error(error);
