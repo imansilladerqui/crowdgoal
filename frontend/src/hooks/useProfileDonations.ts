@@ -103,17 +103,15 @@ export const useProfileDonations = () => {
     }
   };
 
-  // Computed values - check for failed campaigns (where users can claim refunds)
   const totalDonated = donations?.reduce((sum, donation) => sum + donation.donationAmount, 0) || 0;
   const failedDonations = donations?.filter(d => {
-    // Use computed status which considers expiration
     const computedStatus = getComputedCampaignStatus(
       d.campaignStatus,
       d.campaignExpiringDate,
       d.campaignRaised,
       d.campaignGoal
     );
-    return computedStatus === 2; // Failed campaigns allow refunds
+    return computedStatus === 2;
   }) || [];
   const canClaimRefunds = failedDonations.length > 0;
 

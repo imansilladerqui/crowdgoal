@@ -13,6 +13,7 @@ import {
 import { useDonation } from "../hooks/useDonation";
 import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
 import { Loader2, Coins } from "lucide-react";
+import { toast } from "sonner";
 
 interface DonationDialogProps {
   open: boolean;
@@ -49,7 +50,7 @@ export const DonationDialog = ({
         onOpenChange(false);
         onSuccess?.(amount);
       } else {
-        alert(result.error || "Donation failed");
+        toast.error(result.error || "Donation failed");
       }
     } catch (error) {
       unexpectedErrorDialog.setMessage("An unexpected error occurred");

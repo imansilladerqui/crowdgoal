@@ -5,11 +5,14 @@ import { Progress } from "@/components/ui/progress";
 import {  
   Download,
   AlertCircle,
+  Sparkles,
 } from "lucide-react";
 import { useProfileDonations } from "@/hooks/useProfileDonations";
 import { formatCHZ } from "@/lib/utils/formatCHZ";
-import { formatDate } from "@/lib/utils/formatDate";
 import { getDonationStatusInfo } from "@/lib/utils/statusInfo";
+import { calculateProgress } from "@/lib/utils/calculations";
+import { CampaignStatsGrid } from "@/components/CampaignStatsGrid";
+import { ProgressSection } from "@/components/ProgressSection";
 
 const MyDonations = () => {
   const {
@@ -73,24 +76,44 @@ const MyDonations = () => {
       </div>
 
       {canClaimRefunds && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-red-800">
-              <AlertCircle className="h-5 w-5" />
-              <span className="font-semibold">Refunds Available</span>
-            </div>
-            <p className="text-red-700 text-sm mt-1">
-              You have donations in failed campaigns that you can claim refunds for.
-            </p>
-          </CardContent>
-        </Card>
+        <Card className="relative border-2 border-purple-500/40 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-blue-500/5 shadow-2xl hover:shadow-purple-500/30 hover:scale-[1.02] transition-all duration-300 overflow-hidden backdrop-blur-sm">
+          {/* Animated gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/15 via-pink-500/15 to-blue-500/15 opacity-60 animate-pulse"></div>
+          
+          {/* Sparkles decoration */}
+          <div className="absolute top-3 right-3 animate-pulse">
+            <Sparkles className="h-5 w-5 text-purple-400" />
+          </div>
+          
+          {/* Subtle pattern */}
+          <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:20px_20px]"></div>
+          
+            <CardContent className="p-5 relative z-10">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="rounded-xl bg-violet-500 p-2 shadow-md">
+                    <AlertCircle className="h-5 w-5 text-white" strokeWidth={2.5} />
+                  </div>
+                </div>
+                
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-lg font-semibold">
+                    Refunds Available
+                  </h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    You have donations in failed campaigns that you can claim refunds for.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
       )}
 
       <div className="grid gap-6">
         {donations.map((donation) => {
           const statusInfo = getDonationStatusInfo(donation.campaignStatus);
           const StatusIcon = statusInfo.icon;
-          const progressPercentage = Math.min((donation.campaignRaised / donation.campaignGoal) * 100, 100);
+          const progressPercentage = calculateProgress(donation.campaignRaised, donation.campaignGoal);
           const canClaimRefund = donation.campaignStatus === 2;
           const isClaimingRefund = claimingRefunds.has(donation.campaignId);
 
@@ -102,7 +125,7 @@ const MyDonations = () => {
                     <CardTitle className="text-xl">{donation.campaignTitle}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge variant={statusInfo.variant}>
-                        {statusInfo.icon && <StatusIcon className={`h-3 w-3 mr-1 ${statusInfo.color}`} />}
+                        {statusInfo.icon && <StatusIcon className={`h-3 w-3 mr-1 ${statusInfo.variant === 'destructive' ? 'text-destructive-foreground' : statusInfo.color}`} />}
                         {statusInfo.text}
                       </Badge>
                       <Badge variant="outline">
@@ -135,35 +158,19 @@ const MyDonations = () => {
                 <p className="text-muted-foreground">{donation.campaignDescription}</p>
                 
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Campaign Progress</span>
-                    <span>{progressPercentage.toFixed(1)}%</span>
-                  </div>
                   <Progress value={progressPercentage} className="h-2" />
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{formatCHZ(donation.campaignRaised)} CHZ raised</span>
-                    <span>Goal: {formatCHZ(donation.campaignGoal)} CHZ</span>
-                  </div>
+                  <ProgressSection 
+                    raised={donation.campaignRaised} 
+                    goal={donation.campaignGoal}
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold">{donation.donorCount}</div>
-                    <div className="text-sm text-muted-foreground">Supporters</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatCHZ(donation.campaignGoal)}</div>
-                    <div className="text-sm text-muted-foreground">Goal (CHZ)</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatCHZ(donation.campaignRaised)}</div>
-                    <div className="text-sm text-muted-foreground">Raised (CHZ)</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatDate(donation.campaignExpiringDate)}</div>
-                    <div className="text-sm text-muted-foreground">Expired</div>
-                  </div>
-                </div>
+                <CampaignStatsGrid
+                  donorCount={donation.donorCount}
+                  goal={donation.campaignGoal}
+                  raised={donation.campaignRaised}
+                  expiringDate={donation.campaignExpiringDate}
+                />
               </CardContent>
             </Card>
           );

@@ -3,6 +3,7 @@ import { getReadableProvider } from "@/lib/web3/network";
 import { getCampaignFactoryContract } from "@/lib/web3/contracts";
 import { OnChainCampaign, CampaignStatus } from "@/types/web3";
 import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
+import { getWalletAddress } from "@/hooks/UseWalletStorage";
 
 const enumToStatus = (statusValue: number): CampaignStatus => {
   switch (statusValue) {
@@ -15,13 +16,15 @@ const enumToStatus = (statusValue: number): CampaignStatus => {
 };
 
 export function useCampaigns() {
+  const walletAddress = getWalletAddress();
+  
   return useQuery<OnChainCampaign[]>({
-    queryKey: ["campaigns"],
+    queryKey: ["campaigns", walletAddress],
     queryFn: async () => {
       const provider = await getReadableProvider();
       const contract = getCampaignFactoryContract(provider);
 
-      const campaigns: any[] = await contract.getAllCampaigns();
+      const campaigns = await contract.getAllCampaigns() as any[];
 
       const donorCounts: number[] = await Promise.all(
         campaigns.map(async (c) => {
@@ -33,6 +36,19 @@ export function useCampaigns() {
           }
         })
       );
+
+      const userDonations: number[] = walletAddress
+        ? await Promise.all(
+            campaigns.map(async (c) => {
+              try {
+                const donation = await contract.getDonation(c.id, walletAddress);
+                return Number(donation);
+              } catch {
+                return 0;
+              }
+            })
+          )
+        : campaigns.map(() => 0);
 
       return campaigns.map((c, idx) => {
         const onChainStatus = Number(c.status);
@@ -53,6 +69,7 @@ export function useCampaigns() {
           backers: donorCounts[idx] ?? 0,
           authorName: String(c.authorName),
           authorWallet: String(c.authorWallet),
+          userDonation: userDonations[idx] ?? 0,
         };
       });
     },

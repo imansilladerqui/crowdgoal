@@ -30,7 +30,7 @@ export const getCampaignStatusInfo = (status: number): StatusInfo => {
       };
     case 2: // Failed
       return { 
-        text: "Failed - Refund Available", 
+        text: "Failed", 
         variant: "destructive" as const, 
         icon: XCircle,
         color: "text-red-600"
@@ -121,7 +121,7 @@ export const getDonationStatusInfo = (status: number): StatusInfo => {
       };
     case 2: // Failed
       return { 
-        text: "Failed - Refund Available", 
+        text: "Failed",
         variant: "destructive" as const, 
         icon: XCircle,
         color: "text-red-600"

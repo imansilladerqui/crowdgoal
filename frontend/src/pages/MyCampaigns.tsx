@@ -8,9 +8,10 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useProfileMyCampaigns } from "@/hooks/useProfileMyCampaigns";
-import { formatCHZ } from "@/lib/utils/formatCHZ";
-import { formatDate } from "@/lib/utils/formatDate";
 import { getMyCampaignStatusInfo } from "@/lib/utils/statusInfo";
+import { calculateProgress } from "@/lib/utils/calculations";
+import { CampaignStatsGrid } from "@/components/CampaignStatsGrid";
+import { ProgressSection } from "@/components/ProgressSection";
 
 const MyCampaigns = () => {
   const {
@@ -19,8 +20,6 @@ const MyCampaigns = () => {
     withdrawingCampaigns,
     handleWithdrawFunds
   } = useProfileMyCampaigns();
-
-  console.log(campaigns);
 
   if (isLoading) {
     return (
@@ -77,9 +76,7 @@ const MyCampaigns = () => {
           const statusInfo = getMyCampaignStatusInfo(campaign.status, campaign.fundsWithdrawn);
           const StatusIcon = statusInfo.icon;
           
-          const progressPercentage = campaign.goal > 0 
-            ? Math.min((campaign.raised / campaign.goal) * 100, 100) 
-            : 0;
+          const progressPercentage = calculateProgress(campaign.raised, campaign.goal);
             
           const canWithdraw = campaign.status === 1 && !campaign.fundsWithdrawn;
           const isWithdrawing = withdrawingCampaigns.has(campaign.id);
@@ -92,7 +89,7 @@ const MyCampaigns = () => {
                     <CardTitle className="text-xl">{campaign.title}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge variant={statusInfo.variant}>
-                        {campaign.status === 0 ? '' : <StatusIcon className={`h-3 w-3 mr-1 ${statusInfo.color}`} />}
+                        {campaign.status === 0 ? '' : <StatusIcon className="h-3 w-3 mr-1" />}
                         {statusInfo.text}
                       </Badge>
                     </div>
@@ -121,36 +118,18 @@ const MyCampaigns = () => {
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">{campaign.description}</p>
                 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress</span>
-                    <span>{progressPercentage.toFixed(1)}%</span>
-                  </div>
-                  <Progress value={progressPercentage} className="h-2" />
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{formatCHZ(campaign.raised)} CHZ raised</span>
-                    <span>Goal: {formatCHZ(campaign.goal)} CHZ</span>
-                  </div>
-                </div>
+                <ProgressSection 
+                  raised={campaign.raised} 
+                  goal={campaign.goal}
+                />
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold">{campaign.donorCount}</div>
-                    <div className="text-sm text-muted-foreground">Supporters</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatCHZ(campaign.goal)}</div>
-                    <div className="text-sm text-muted-foreground">Goal (CHZ)</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatCHZ(campaign.raised)}</div>
-                    <div className="text-sm text-muted-foreground">Raised (CHZ)</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{formatDate(campaign.expiringDate)}</div>
-                    <div className="text-sm text-muted-foreground">Expires</div>
-                  </div>
-                </div>
+                <CampaignStatsGrid
+                  donorCount={campaign.donorCount}
+                  goal={campaign.goal}
+                  raised={campaign.raised}
+                  expiringDate={campaign.expiringDate}
+                  dateLabel="Expires"
+                />
 
                 {canWithdraw && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
