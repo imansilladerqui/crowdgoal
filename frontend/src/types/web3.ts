@@ -11,6 +11,7 @@ export interface OnChainCampaign {
   backers: number;
   authorName: string;
   authorWallet: string;
+  userDonation?: number;
 }
 
 export type CreateCampaignArgs = [

@@ -5,6 +5,7 @@ import NotFound from "./pages/NotFound";
 import { WalletConnectionProvider } from "./lib/providers/WalletConnectionProvider";
 import WalletDialogManager from "./components/WalletDialogManager";
 import { WalletDialogProvider } from "./lib/providers/WalletDialogProvider";
+import { ToastProvider } from "./components/ToastProvider";
 import { Suspense, lazy } from "react";
 import { normalizeWeb3Error } from "@/lib/web3/errors";
 import ChainReadinessBanner from "@/components/ChainReadinessBanner";
@@ -60,6 +61,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <WalletDialogProvider>
+    <ToastProvider />
     <WalletDialogManager />
     <WalletConnectionProvider>
       <QueryClientProvider client={queryClient}>

@@ -14,6 +14,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/datepicker.css";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type FormData = {
   authorWallet: string;
@@ -48,7 +49,6 @@ const CreateProject = () => {
 
   const { postProject } = useCreateProject();
 
-  // Helper functions for date selection
   const setQuickDate = (days: number) => {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
@@ -68,7 +68,6 @@ const CreateProject = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // Convert Date to timestamp for the contract
       const formDataWithTimestamp = {
         ...data,
         expiringDate: selectedDate ? Math.floor(selectedDate.getTime() / 1000).toString() : "0",
@@ -83,7 +82,7 @@ const CreateProject = () => {
         reset();
         setSelectedDate(null);
       } else {
-        alert(`Error: ${result.error}`);
+        toast.error(result.error || "Failed to create project");
       }
     } catch (error) {
       unexpectedErrorDialog.setMessage("An unexpected error occurred. Please try again.");

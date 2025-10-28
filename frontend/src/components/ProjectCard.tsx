@@ -6,11 +6,17 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Users, User, Calendar, ExternalLink } from "lucide-react";
+import { Clock, Users, User, ExternalLink, Download, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { formatCHZ } from "@/lib/utils/formatCHZ";
 import { getCampaignStatusInfo } from "@/lib/utils/statusInfo";
+import { calculateProgress } from "@/lib/utils/calculations";
+import { useState } from "react";
+import { useWalletDialogs } from "@/lib/context/WalletDialogContext";
+import { BrowserProvider } from "ethers";
+import { getCampaignFactoryContract } from "@/lib/web3/contracts";
+import { toast } from "sonner";
 
 interface ProjectCardProps {
   id: string;
@@ -22,6 +28,8 @@ interface ProjectCardProps {
   daysLeft: number;
   status: string;
   authorName?: string;
+  expiringDate?: number;
+  userDonation?: number;
 }
 
 const ProjectCard = ({
@@ -34,10 +42,15 @@ const ProjectCard = ({
   daysLeft,
   status,
   authorName,
+  expiringDate,
+  userDonation = 0,
 }: ProjectCardProps) => {
   const navigate = useNavigate();
+  const [isClaimingRefund, setIsClaimingRefund] = useState(false);
+  const { refundErrorDialog } = useWalletDialogs();
   
-  const progressPercentage = Math.min((raised / goal) * 100, 100);
+  const progressPercentage = calculateProgress(raised, goal);
+  const isRefundAvailable = status === 'failed' && userDonation > 0;
 
   const getStatusNumber = (status: string): number => {
     switch (status) {
@@ -49,14 +62,12 @@ const ProjectCard = ({
     }
   };
 
-  const getStatusInfo = (status: string) => {
-    const statusNumber = getStatusNumber(status);
-    return getCampaignStatusInfo(statusNumber);
-  };
+  const statusInfo = getCampaignStatusInfo(getStatusNumber(status));
+  const StatusIcon = statusInfo.icon;
 
-  const Badge = ({ variant, className, children }: { variant: string; className?: string; children: React.ReactNode }) => {
+  const StatusBadge = ({ variant, className = "", children }: { variant: string; className?: string; children: React.ReactNode }) => {
     const baseClasses = "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors";
-    const variantClasses = {
+    const variantClasses: Record<string, string> = {
       default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
       success: "border-transparent bg-green-600 text-white hover:bg-green-700",
       destructive: "border-transparent bg-red-600 text-white hover:bg-red-700",
@@ -65,10 +76,43 @@ const ProjectCard = ({
     };
     
     return (
-      <div className={cn(baseClasses, variantClasses[variant as keyof typeof variantClasses] || variantClasses.default, className)}>
+      <div className={cn(baseClasses, variantClasses[variant] || variantClasses.default, className)}>
         {children}
       </div>
     );
+  };
+
+  const handleClaimRefund = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!window.ethereum) {
+      refundErrorDialog.setMessage('Please connect your wallet to claim refunds.');
+      refundErrorDialog.show();
+      return;
+    }
+
+    setIsClaimingRefund(true);
+
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = getCampaignFactoryContract(signer);
+
+      const tx = await contract.claimRefund(id);
+      await tx.wait();
+
+      toast.success("Refund Claimed Successfully!", {
+        description: "Your refund has been sent to your wallet.",
+        duration: 5000,
+      });
+      
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error: any) {
+      refundErrorDialog.setMessage(error.message || 'There was an error processing your refund claim. Please try again.');
+      refundErrorDialog.show();
+    } finally {
+      setIsClaimingRefund(false);
+    }
   };
 
   const isUrgent = daysLeft <= 3 && status === 'open';
@@ -78,19 +122,28 @@ const ProjectCard = ({
     <Card className="group overflow-hidden border-border/50 bg-gradient-card hover:border-primary/50 transition-all duration-300 hover:shadow-glow-secondary flex flex-col h-full">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between mb-2">
-          <Badge 
-            variant={getStatusInfo(status).variant}
-            className="backdrop-blur-sm bg-background/80"
+          <StatusBadge 
+            variant={statusInfo.variant}
+            className={statusInfo.variant === 'destructive' ? '' : 'backdrop-blur-sm bg-background/80'}
           >
-            {getStatusInfo(status).text}
-          </Badge>
+            {StatusIcon && <StatusIcon className="h-3 w-3 mr-1" />}
+            {statusInfo.text}
+          </StatusBadge>
           
-          {isUrgent && (
-            <Badge variant="warning" className="animate-pulse backdrop-blur-sm bg-background/80">
-              <Clock className="h-3 w-3 mr-1" />
-              Urgent
-            </Badge>
-          )}
+          <div className="flex gap-2">
+            {isRefundAvailable && (
+              <StatusBadge variant="destructive" className="bg-red-600 hover:bg-red-700">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                Refund Available
+              </StatusBadge>
+            )}
+            {isUrgent && (
+              <StatusBadge variant="warning" className="animate-pulse backdrop-blur-sm bg-background/80">
+                <Clock className="h-3 w-3 mr-1" />
+                Urgent
+              </StatusBadge>
+            )}
+          </div>
         </div>
         
         <h3 className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors">
@@ -139,14 +192,49 @@ const ProjectCard = ({
       </CardContent>
 
       <CardFooter className="mt-auto">
-        <Button
-          variant="outline-primary"
-          className="w-full group-hover:border-primary group-hover:text-primary group-hover:bg-primary/5 transition-all duration-300"
-          onClick={() => navigate(`/campaign/${id}`)}
-        >
-          {isSuccessful ? "View Details" : "Support Project"}
-          <ExternalLink className="h-4 w-4 ml-2" />
-        </Button>
+        {isRefundAvailable ? (
+          <div className="w-full space-y-2">
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleClaimRefund}
+              disabled={isClaimingRefund}
+            >
+              {isClaimingRefund ? (
+                <>
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
+                  Claiming...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Claim Refund
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate(`/campaign/${id}`)}
+            >
+              View Details
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant={status === 'open' ? "outline-primary" : "outline"}
+            className={`w-full ${
+              status === 'open' 
+                ? "group-hover:border-primary group-hover:text-primary group-hover:bg-primary/5 transition-all duration-300" 
+                : ""
+            }`}
+            onClick={() => navigate(`/campaign/${id}`)}
+          >
+            {status === 'open' ? "Support Project" : "View Details"}
+            <ExternalLink className="h-4 w-4 ml-2" />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

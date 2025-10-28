@@ -13,23 +13,25 @@ import {
   Clock, 
   Users, 
   ExternalLink,
-  Calendar,
   User,
   Target,
   TrendingUp,
   Copy,
-  Check,
-  Heart
+  Download,
+  AlertCircle
 } from "lucide-react";
 import { useState } from "react";
 import { formatCHZ } from "@/lib/utils/formatCHZ";
 import { getCampaignStatusInfo } from "@/lib/utils/statusInfo";
 import { getComputedCampaignStatus } from "@/lib/utils/campaignStatus";
+import { calculateProgress } from "@/lib/utils/calculations";
+import { getWalletAddress } from "@/hooks/UseWalletStorage";
+import { BrowserProvider } from "ethers";
+import { toast } from "sonner";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [copied, setCopied] = useState(false);
   const { donationDialog } = useWalletDialogs();
 
   const { data: campaign, isLoading, isError } = useQuery({
@@ -58,6 +60,23 @@ const CampaignDetails = () => {
     },
     enabled: !!id,
   });
+
+  const walletAddress = getWalletAddress();
+  const { data: userDonation = 0 } = useQuery({
+    queryKey: ["user-donation", id, walletAddress],
+    queryFn: async () => {
+      if (!id || !walletAddress) return 0;
+      
+      const provider = await getReadableProvider();
+      const contract = getCampaignFactoryContract(provider);
+      const donation = await contract.getDonation(id, walletAddress);
+      return Number(donation);
+    },
+    enabled: !!id && !!walletAddress,
+  });
+
+  const [isClaimingRefund, setIsClaimingRefund] = useState(false);
+  const { refundSuccessDialog, refundErrorDialog } = useWalletDialogs();
 
   if (isLoading) {
     return (
@@ -92,7 +111,7 @@ const CampaignDetails = () => {
     );
   }
 
-  const progressPercentage = Math.min((campaign.raised / campaign.goal) * 100, 100);
+  const progressPercentage = calculateProgress(campaign.raised, campaign.goal);
   const daysLeft = Math.max(0, Math.ceil((campaign.expiringDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
   
   const computedStatus = getComputedCampaignStatus(
@@ -102,21 +121,53 @@ const CampaignDetails = () => {
     campaign.goal
   );
   
-  // Get status info using utility
-  const getStatusInfo = () => getCampaignStatusInfo(computedStatus);
-
   const isUrgent = daysLeft <= 3 && computedStatus === 0;
-  const isSuccessful = computedStatus === 1 || computedStatus === 3;
+  const statusInfo = getCampaignStatusInfo(computedStatus);
 
   const copyUrl = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      toast.success("Campaign link copied to clipboard!", {
+        description: "Share this campaign with others!",
+      });
     } catch (err) {
+      toast.error("Failed to copy link");
     }
   };
+
+  const handleClaimRefund = async () => {
+    if (!window.ethereum || !id) {
+      refundErrorDialog.setMessage('Please connect your wallet to claim refunds.');
+      refundErrorDialog.show();
+      return;
+    }
+
+    setIsClaimingRefund(true);
+
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = getCampaignFactoryContract(signer);
+
+      const tx = await contract.claimRefund(id);
+      await tx.wait();
+
+      toast.success("Refund Claimed Successfully!", {
+        description: "Your refund has been sent to your wallet.",
+        duration: 5000,
+      });
+      
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error: any) {
+      refundErrorDialog.setMessage(error.message || 'There was an error processing your refund claim. Please try again.');
+      refundErrorDialog.show();
+    } finally {
+      setIsClaimingRefund(false);
+    }
+  };
+
+  const isRefundAvailable = computedStatus === 2 && userDonation > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,13 +187,19 @@ const CampaignDetails = () => {
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <Badge variant={getStatusInfo().variant}>
-                  {getStatusInfo().text}
+                <Badge variant={statusInfo.variant}>
+                  {statusInfo.text}
                 </Badge>
                 {isUrgent && (
                   <Badge variant="warning" className="animate-pulse">
                     <Clock className="h-3 w-3 mr-1" />
                     Urgent
+                  </Badge>
+                )}
+                {isRefundAvailable && (
+                  <Badge variant="destructive" className="bg-red-600 hover:bg-red-700">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Refund Available
                   </Badge>
                 )}
               </div>
@@ -224,14 +281,50 @@ const CampaignDetails = () => {
           </CardContent>
         </Card>
 
+        {/* Refund Alert */}
+        {isRefundAvailable && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-red-800">
+                  <AlertCircle className="h-5 w-5" />
+                  <div>
+                    <div className="font-semibold">Refund Available</div>
+                    <p className="text-sm text-red-700">
+                      You donated {formatCHZ(userDonation)} CHZ to this campaign. You can claim your refund now.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleClaimRefund}
+                  disabled={isClaimingRefund}
+                  variant="destructive"
+                  className="shrink-0"
+                >
+                  {isClaimingRefund ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-t-transparent border-white rounded-full" />
+                      Claiming...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Claim Refund
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Action Buttons */}
         <div className="flex gap-4">
-          {isSuccessful ? (
-            <Button size="lg" className="flex-1">
-              <ExternalLink className="h-4 w-4 mr-2" />
-              View Details
+          {isRefundAvailable ? (
+            <Button size="lg" className="flex-1" variant="secondary" disabled>
+              Campaign Ended
             </Button>
-          ) : (
+          ) : computedStatus === 0 ? (
             <Button 
               size="lg" 
               className="flex-1"
@@ -245,28 +338,21 @@ const CampaignDetails = () => {
             >
               Support This Campaign
             </Button>
+          ) : (
+            <Button size="lg" className="flex-1">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Details
+            </Button>
           )}
           
           <Button 
             variant="outline" 
             size="lg"
             onClick={copyUrl}
-            className={`relative transition-all duration-200 ${
-              copied ? "bg-green-50 border-green-200 text-green-700" : ""
-            }`}
-            title={copied ? "Copied!" : "Copy campaign URL"}
+            title="Copy campaign URL"
           >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4 mr-2" />
-                Share Campaign
-              </>
-            )}
+            <Copy className="h-4 w-4 mr-2" />
+            Share Campaign
           </Button>
         </div>
       </div>

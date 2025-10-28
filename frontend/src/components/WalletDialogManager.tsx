@@ -20,7 +20,9 @@ const WalletDialogManager = () => {
     walletRejectedDialog,
     successDialog,
     thankYouDialog,
-    donationDialog
+    donationDialog,
+    refundSuccessDialog,
+    refundErrorDialog
   } = useWalletDialogs();
   const { confirmConnectWallet, isConnecting } = useWalletConnection();
 
@@ -89,6 +91,18 @@ const WalletDialogManager = () => {
           });
           thankYouDialog.show();
         }}
+      />
+      <WalletErrorDialog
+        open={refundSuccessDialog.open}
+        onOpenChange={refundSuccessDialog.setOpen}
+        title="Refund Success"
+        message={refundSuccessDialog.message}
+      />
+      <WalletErrorDialog
+        open={refundErrorDialog.open}
+        onOpenChange={refundErrorDialog.setOpen}
+        title="Refund Error"
+        message={refundErrorDialog.message}
       />
     </>
   );

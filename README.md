@@ -1,11 +1,11 @@
 # CrowdGoal 🎯
 
-A decentralized crowdfunding platform built on the Spicy Network (Chiliz) blockchain, enabling users to create and fund campaigns using CHZ tokens.
+A decentralized crowdfunding platform built on the Chiliz Chain blockchain, enabling users to create and fund campaigns using CHZ tokens.
 
 ## 🌟 Features
 
 - **Decentralized Campaign Creation**: Create crowdfunding campaigns directly on the blockchain
-- **Native CHZ Support**: Fund campaigns using CHZ tokens on Spicy Network
+- **Native CHZ Support**: Fund campaigns using CHZ tokens on Chiliz Chain
 - **Smart Contract Security**: Built with OpenZeppelin security standards
 - **Platform Fee System**: 3% platform fee for sustainable operations
 - **Refund Mechanism**: Automatic refunds for failed campaigns
@@ -34,7 +34,7 @@ A decentralized crowdfunding platform built on the Spicy Network (Chiliz) blockc
 
 - Node.js 18+
 - MetaMask wallet
-- CHZ tokens on Spicy Network
+- CHZ tokens on Chiliz Chain
 - Git
 
 ### Installation
@@ -66,7 +66,7 @@ A decentralized crowdfunding platform built on the Spicy Network (Chiliz) blockc
 
    # Edit frontend/.env with your configuration
    VITE_CAMPAIGN_FACTORY_ADDRESS=0x...
-   VITE_SPICY_RPC_URL=https://spicy-rpc.chiliz.com
+   VITE_CHILIZ_RPC_URL=https://spicy-rpc.chiliz.com
    VITE_CHAIN_ID=88882
    ```
 
@@ -89,25 +89,24 @@ Create a `.env` file in the `frontend` directory:
 ```env
 # Contract Configuration
 VITE_CAMPAIGN_FACTORY_ADDRESS=0xYourDeployedContractAddress
-VITE_CAMPAIGN_FACTORY_NAME=CampaignFactory
 
 # Network Configuration
-VITE_SPICY_RPC_URL=https://spicy-rpc.chiliz.com
+VITE_CHILIZ_RPC_URL=https://spicy-rpc.chiliz.com
 VITE_CHAIN_ID=88882
-VITE_CHAIN_NAME=Spicy Network
+VITE_CHAIN_NAME=Chiliz Chain
 VITE_CURRENCY_SYMBOL=CHZ
 VITE_CURRENCY_DECIMALS=18
 ```
 
 ### MetaMask Setup
 
-1. **Add Spicy Network to MetaMask**
+1. **Add Chiliz Chain to MetaMask**
 
-   - Network Name: Spicy Network
-   - RPC URL: `https://spicy-rpc.chiliz.com`
-   - Chain ID: `88882`
+   - Network Name: Chiliz Chain
+   - RPC URL: `https://rpc.ankr.com/chiliz`
+   - Chain ID: `88888`
    - Currency Symbol: `CHZ`
-   - Block Explorer: `https://spicy-explorer.chiliz.com`
+   - Block Explorer: `https://scan.chiliz.com`
 
 2. **Get CHZ Tokens**
    - Use a bridge or exchange to get CHZ tokens
@@ -191,12 +190,12 @@ npm run test         # Run contract tests
      solidity: {
        version: "0.8.19",
        settings: {
-         evmVersion: "shanghai", // Compatible with Spicy Network
+         evmVersion: "shanghai", // Compatible with Chiliz Chain
        },
      },
      networks: {
-       spicy: {
-         url: "https://spicy-rpc.chiliz.com",
+       chiliz: {
+         url: "https://rpc.ankr.com/chiliz",
          chainId: 88882,
          accounts: [process.env.PRIVATE_KEY],
        },
@@ -208,7 +207,7 @@ npm run test         # Run contract tests
 
    ```bash
    cd contracts
-   npx hardhat run scripts/deploy.js --network spicy
+   npx hardhat run scripts/deploy.js --network chiliz
    ```
 
 3. **Update Environment**
@@ -246,7 +245,7 @@ npm run test         # Run contract tests
 **"Campaign Factory not found"**
 
 - Verify `VITE_CAMPAIGN_FACTORY_ADDRESS` in `.env`
-- Ensure contract is deployed on Spicy Network
+- Ensure contract is deployed on Chiliz Chain
 
 ### Getting Help
 
@@ -271,7 +270,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [OpenZeppelin](https://openzeppelin.com/) for secure smart contract libraries
-- [Chiliz](https://chiliz.com/) for the Spicy Network infrastructure
+- [Chiliz](https://chiliz.com/) for the Chiliz Chain infrastructure
 - [React](https://reactjs.org/) and [TypeScript](https://www.typescriptlang.org/) communities
 
 ## 📞 Contact
